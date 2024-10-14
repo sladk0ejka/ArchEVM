@@ -212,7 +212,8 @@ https://docs.google.com/spreadsheets/d/1syVSAh8Z6N3TBxKxDxMuvgsFo4jwlBLr2ZgBslkR
 ## Задание 3
 ### Скрипт для изменения воспроизведение звуковых файлов в зависимости от значения очков здоровья
 
-```с#
+```С#
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
