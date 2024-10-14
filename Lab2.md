@@ -210,7 +210,61 @@ https://docs.google.com/spreadsheets/d/1syVSAh8Z6N3TBxKxDxMuvgsFo4jwlBLr2ZgBslkR
 - Уменшить урон сплеша с ножа на 50%.
   
 ## Задание 3
-### 
+### Скрипт для изменения воспроизведение звуковых файлов в зависимости от значения очков здоровья
+
+```с#
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class HealthController : MonoBehaviour
+{
+    public AudioSource healthSource; 
+    public AudioClip damageSound;
+    public AudioClip deathSound;
+
+    private int maxHealth;
+    private int currentHealth;
+
+    private List<int> hpList = new List<int>() { 30, 20, 10, 0, 30 }; // Примерные значения хп
+    private int currentHpIndex = 0; 
+    private float nextSoundTime = 0f; 
+
+    void Start()
+    {
+        maxHealth = 30;
+        currentHealth = maxHealth;
+        healthSource = GetComponent<AudioSource>(); 
+    }
+
+    void Update()
+    {
+        if (currentHpIndex < hpList.Count)
+        {
+            currentHealth = hpList[currentHpIndex]; 
+
+            if (Time.time >= nextSoundTime)
+            {
+                if (currentHealth == maxHealth)
+                {
+                    healthSource.PlayOneShot(fullHealthSound);
+                }
+                else if (currentHealth > 0)
+                {
+                    healthSource.PlayOneShot(damageSound);
+                }
+                else if (currentHealth == 0)
+                {
+                    healthSource.PlayOneShot(deathSound);
+                }
+
+                nextSoundTime = Time.time + 5f; 
+                currentHpIndex++; 
+            }
+        }
+    }
+}
+```
 
 ## Выводы
 
