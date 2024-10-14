@@ -88,6 +88,7 @@
 
 #### Скрипт, который заполняет таблицу данными, описывающими здоровье в игре “СПАСТИ РТФ:Выживание”
 
+```py
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 
@@ -179,6 +180,7 @@ result = service.spreadsheets().values().update(
   valueInputOption='RAW',
   body=body
 ).execute()
+```
 
 #### Таблица и диаграмма, описывающими здоровье в игре “СПАСТИ РТФ:Выживание”
 
