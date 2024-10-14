@@ -71,7 +71,7 @@
 - Начальное здоровье: 30
 - После получения 20 единиц урона: 10
 - После 5 секунд без урона, с регенерацией: 11
-- После убийства зомби с 10% вампиризма: 12
+- После удара по зомби с 1% вампиризма: 10,5-14
 - После повышения максимального уровня здоровья на 3 уровня: 60
 
 #### Ключевые моменты:
@@ -84,8 +84,129 @@
 ![image](https://github.com/user-attachments/assets/1e5c9916-b252-43a6-a264-3f74c67a829a)
 
 ## Задание 2
-### 
+### С помощью скрипта на языке Python заполнитm google-таблицу данными, описывающими выбранную игровую переменную в игре “СПАСТИ РТФ:Выживание”.
 
+#### Скрипт, который заполняет таблицу данными, описывающими здоровье в игре “СПАСТИ РТФ:Выживание”
+
+from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
+
+# Your Google Sheet URL (e.g., "https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=0")
+SHEET_URL = "https://sheets.googleapis.com/v4/spreadsheets/1syVSAh8Z6N3TBxKxDxMuvgsFo4jwlBLr2ZgBslkR-qw/values/Лист1?key=AIzaSyC2DxxKqhCcKlgS_MPVH2MfIuHgs_BDtDM"
+
+# Extract the Sheet ID from the URL
+SHEET_ID = SHEET_URL.split("/")[5]
+
+# Define the health variable data
+health_data = [
+  {
+    "Variable": "Condition",
+    "Change": "Change",
+    "Amount": "Amount",
+    "Change Conditions": [
+      {
+        "Condition": "Taking damage from zombie attacks",
+        "Change": "Decreases",
+        "Amount": "10"
+      },
+      {
+        "Condition": "Taking damage from boss attacks",
+        "Change": "Decreases",
+        "Amount": "35"
+      },
+      {
+        "Condition": "Regeneration (5 seconds without damage)",
+        "Change": "Increases",
+        "Amount": "1 health point every 3 seconds"
+      },
+      {
+        "Condition": "Vampirism (zombie damage)",
+        "Change": "Increases",
+        "Amount": "1% of damage dealt"
+      },
+      {
+        "Condition": "Leveling up maximum health",
+        "Change": "Increases",
+        "Amount": "+10 maximum health per level"
+      }
+    ]
+  }
+]
+
+health_data_visualization = [
+  ['',''],
+  ['Example', 'Regen Health','Example', 'Vamp Health'],
+  ['Start health', 30,'Start health', 30],
+  ['After zombie attack', 20,'After zombie attack', 20],
+  ['After regeneration', 21, 'After vampirism (default damage)', 21],
+  ['','','',22],
+  ['','','',23],
+  ['',22,'',24],
+  ['','','',25],
+  ['','','',26],
+  ['',23,'',27],
+  ['','','',28],
+  ['','','',29],
+  ['',24,'',30],
+  ['',''],
+  ['',''],
+  ['',25]
+]
+
+
+# Create the data for the spreadsheet
+body = {
+ 'values': [
+  # First row
+  [health_data[0]['Variable'], health_data[0]['Change'], health_data[0]['Amount']],
+
+  # Subsequent rows from 'Change Conditions'
+  *[[condition['Condition'], condition['Change'], condition['Amount']]
+    for condition in health_data[0]['Change Conditions']]
+ ] + health_data_visualization[:]
+}
+
+
+
+# Create the service object
+creds = Credentials.from_service_account_file(r'C:\Users\amnix\UrFU\Lab2\unitydatascience-438521-26281ac6b69a.json')
+service = build('sheets', 'v4', credentials=creds)
+
+# Update the spreadsheet
+result = service.spreadsheets().values().update(
+  spreadsheetId=SHEET_ID,
+  range='F2:L50', # Target range: from F2 to H6 (inclusive)
+  valueInputOption='RAW',
+  body=body
+).execute()
+
+#### Таблица и диаграмма, описывающими здоровье в игре “СПАСТИ РТФ:Выживание”
+
+https://docs.google.com/spreadsheets/d/1syVSAh8Z6N3TBxKxDxMuvgsFo4jwlBLr2ZgBslkR-qw/edit?hl=ru&gid=0#gid=0
+
+![image](https://github.com/user-attachments/assets/3fc3d8a6-8a27-44bc-9a61-0afa8f9afa64)
+
+![image](https://github.com/user-attachments/assets/40e3d478-f4c2-4fbf-874e-6363f6bb5714)
+
+
+#### Изменение здоровья в игре имеет гибридный характер, сочетая в себе:
+
+- Дискретные изменения: Здоровье восстанавливается фиксированными порциями по 1 HP в 3 секунды.
+- Восстановление в зависимости от времени: Регенерация ограничена кулдауном, основанным на последнем получении игроком урона.
+- Переменная скорость: Вампиризма зависит от скорости нанесения урона, которая может меняться в зависимости от оружия и хп зомби/количество зомби.
+
+#### Недостатки в реализации здоровья:
+  
+- Регенерация здоровья хорошая механика, но слишком долгая. Бегать кругами от зомби ожидая восстановления очередной единицы здоровья в течении долгого времени довольно утомительно.
+- Вампиризм слишком сильный - если удар по ноге или в тело хилит 0.5 - 1 хп, то удар в голову сразу все 4 (в качестве оружия рассматривается нож).
+- В качестве эксплойта можно сказать, что с ножа ты бьешь не одного противника а сплешем в определенном радиусе. Сплеш, непосредственно, является нанесением урона, из-за чего вампиризм хилит огромные цифры здоровья. А собрать толпу зомби вместе и бегать вокруг практически не получая урона довольно простая задача, что тоже по сути эксплойт.
+
+#### Предложение модификации здоровья:
+  
+- Регенерацию здоровья можно сделать раз в 1.5 секунды вместо трех, так хотя бы будет видно, что оно восстанавливается).
+- Уменшить вампризим от удара по голове до 3.
+- Уменшить урон сплеша с ножа на 50%.
+  
 ## Задание 3
 ### 
 
